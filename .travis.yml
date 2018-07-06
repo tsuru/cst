@@ -1,0 +1,17 @@
+language: go
+
+go:
+- "1.10.x"
+- master
+
+install:
+- make get-dev-deps
+
+jobs:
+  include:
+    - stage: build
+      script: make build
+
+    - stage: test
+      script: make lint
+    - script: make test-with-coverage
