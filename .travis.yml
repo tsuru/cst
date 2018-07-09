@@ -7,6 +7,12 @@ go:
 install:
 - make get-dev-deps
 
+services:
+- mongodb
+
+env:
+  global:
+
 jobs:
   include:
     - stage: build
@@ -15,3 +21,5 @@ jobs:
     - stage: test
       script: make lint
     - script: make test-with-coverage
+      env: 
+      - STORAGE_URL=mongodb://127.0.0.1:27017/
