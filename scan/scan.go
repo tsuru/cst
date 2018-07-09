@@ -35,3 +35,8 @@ type Result struct {
 	Vulnerabilities interface{} `bson:"vulnerabilities,omitempty" json:"vulnerabilities,omitempty"`
 	Error           string      `bson:"error,omitempty" json:"error,omitempty"`
 }
+
+// Scanner defines the actions about a common security scanner.
+type Scanner interface {
+	Scan(string) Result
+}
