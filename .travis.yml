@@ -10,9 +10,6 @@ install:
 services:
 - mongodb
 
-env:
-  global:
-
 jobs:
   include:
     - stage: build
