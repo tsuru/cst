@@ -163,6 +163,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/tsuru/monsterqueue"
+  packages = [
+    ".",
+    "log",
+    "mongodb"
+  ]
+  revision = "70e946ec66c3704722539ebf0b8beadf2d43146a"
+
+[[projects]]
+  branch = "master"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
   revision = "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
@@ -206,6 +216,18 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "v2"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
+  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -214,6 +236,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb647d6f0b2a861eb17f3651a53cb7608ae32cbdb3094b35d4fd8146e12c40ad"
+  inputs-digest = "3bffe40d6a318f9f949be8a2e481dc69ae2ae3f67af8734f01d36bf7997bf3fc"
   solver-name = "gps-cdcl"
   solver-version = 1
