@@ -52,3 +52,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/globalsign/mgo"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/tsuru/monsterqueue"
