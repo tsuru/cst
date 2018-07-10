@@ -36,6 +36,9 @@ func (ws *SecureWebServer) Start() error {
 	ws.echo.Use(middleware.Recover())
 	ws.echo.Use(middleware.Logger())
 
+	v1 := ws.echo.Group("/v1")
+	v1.POST("/container/scan", createScan)
+
 	address := fmt.Sprintf(":%d", ws.Port)
 
 	return ws.echo.StartTLS(address, ws.CertFile, ws.KeyFile)
