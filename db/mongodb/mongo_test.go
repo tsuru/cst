@@ -119,3 +119,51 @@ func TestMongoDB_Close(t *testing.T) {
 		})
 	})
 }
+
+func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
+
+	if !viper.IsSet("STORAGE_URL") {
+		t.Skip("mongodb connection url are not assigned, skipping integration tests")
+	}
+
+	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+
+	if err != nil {
+		assert.FailNow(t, "could not connect with mongodb")
+	}
+
+	t.Run(`When exists a scan document with same image and status scheduled, should return true`, func(t *testing.T) {
+
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scanColl.Insert(scan.Scan{
+			Image:  "tsuru/cst:latest",
+			Status: scan.StatusScheduled,
+		})
+
+		assert.True(t, mongo.HasScheduledScanByImage("tsuru/cst:latest"))
+	})
+
+	t.Run(`When exist a scan document but with status non-scheduled, should return false`, func(t *testing.T) {
+
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scanColl.Insert(scan.Scan{
+			ID:     "2b935a8f-4241-49f0-a1a2-e3c8ba347b95",
+			Image:  "tsuru/cst:latest",
+			Status: scan.StatusFinished,
+		})
+
+		assert.False(t, mongo.HasScheduledScanByImage("tsuru/cst:latest"))
+	})
+}
