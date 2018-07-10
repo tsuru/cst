@@ -22,6 +22,24 @@ func (mongo *MongoDB) Save(scan scan.Scan) error {
 	return err
 }
 
+// HasScheduledScanByImage checks if exists scan documents given image (by
+// parameter) and status "scheduled" on MongoDB service. Returns true when
+// exists one or more documents otherwise returns false.
+func (mongo *MongoDB) HasScheduledScanByImage(image string) bool {
+
+	collection := mongo.getScanCollection()
+	defer collection.Database.Session.Close()
+
+	scanFilter := scan.Scan{
+		Image:  image,
+		Status: scan.StatusScheduled,
+	}
+
+	documentsCount, _ := collection.Find(scanFilter).Count()
+
+	return documentsCount > 0
+}
+
 // Close permanently terminates the session with MongoDB service.
 func (mongo *MongoDB) Close() {
 	mongo.session.Close()
