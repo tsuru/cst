@@ -3,6 +3,7 @@ package mongodb
 import (
 	"github.com/globalsign/mgo"
 	"github.com/tsuru/cst/scan"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // MongoDB implements a Storage interface.
@@ -43,6 +44,24 @@ func (mongo *MongoDB) HasScheduledScanByImage(image string) bool {
 // Close permanently terminates the session with MongoDB service.
 func (mongo *MongoDB) Close() {
 	mongo.session.Close()
+}
+
+// AppendResultToScanByID append the result on scan on MongoDB service.
+func (mongo *MongoDB) AppendResultToScanByID(id string, result scan.Result) error {
+
+	collection := mongo.getScanCollection()
+	defer collection.Database.Session.Close()
+
+	return collection.UpdateId(id, bson.M{"$push": bson.M{"result": result}})
+}
+
+// UpdateScanStatusByID updates the scan status on MongoDB service.
+func (mongo *MongoDB) UpdateScanStatusByID(id string, status scan.Status) error {
+
+	collection := mongo.getScanCollection()
+	defer collection.Database.Session.Close()
+
+	return collection.UpdateId(id, bson.M{"$set": bson.M{"status": status}})
 }
 
 func (mongo *MongoDB) getScanCollection() *mgo.Collection {

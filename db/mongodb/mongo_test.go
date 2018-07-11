@@ -167,3 +167,91 @@ func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
 		assert.False(t, mongo.HasScheduledScanByImage("tsuru/cst:latest"))
 	})
 }
+
+func TestMongoDB_AppendResultToScanByID(t *testing.T) {
+
+	if !viper.IsSet("STORAGE_URL") {
+		t.Skip("mongodb connection url are not assigned, skipping integration tests")
+	}
+
+	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+
+	if err != nil {
+		assert.FailNow(t, "could not connect with mongodb")
+	}
+
+	t.Run(`When a scan has no results yet, should return one result after`, func(t *testing.T) {
+
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scanColl.Insert(scan.Scan{
+			ID:     "2b935a8f-4241-49f0-a1a2-e3c8ba347b95",
+			Image:  "tsuru/cst:latest",
+			Result: []scan.Result{},
+		})
+
+		var scanOnStorage scan.Scan
+
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+
+		assert.Equal(t, 0, len(scanOnStorage.Result))
+
+		err := mongo.AppendResultToScanByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.Result{
+			Scanner:         "scanner-example",
+			Vulnerabilities: "all-vulns-described-here",
+		})
+
+		if assert.NoError(t, err) {
+			scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+
+			assert.Equal(t, 1, len(scanOnStorage.Result))
+		}
+	})
+}
+
+func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
+
+	if !viper.IsSet("STORAGE_URL") {
+		t.Skip("mongodb connection url are not assigned, skipping integration tests")
+	}
+
+	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+
+	if err != nil {
+		assert.FailNow(t, "could not connect with mongodb")
+	}
+
+	t.Run(`When updating scan to running status, should update scan status to running`, func(t *testing.T) {
+
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scanColl.Insert(scan.Scan{
+			ID:     "2b935a8f-4241-49f0-a1a2-e3c8ba347b95",
+			Status: scan.StatusScheduled,
+		})
+
+		var scanOnStorage scan.Scan
+
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+
+		assert.Equal(t, scan.StatusScheduled, scanOnStorage.Status)
+
+		err := mongo.UpdateScanStatusByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.StatusRunning)
+
+		if assert.NoError(t, err) {
+			scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+
+			assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
+		}
+	})
+}
