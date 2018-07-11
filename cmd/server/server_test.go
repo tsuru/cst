@@ -12,15 +12,31 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/tsuru/cst/api"
+	"github.com/tsuru/cst/db/mongodb"
+	"github.com/tsuru/monsterqueue"
 )
 
 func TestServerCommandPreRun(t *testing.T) {
 
+	oldNewQueue := newQueue
+	oldNewStorage := newStorage
+
 	defer func() {
 		webserver = nil
+
+		newQueue = oldNewQueue
+		newStorage = oldNewStorage
 	}()
 
-	t.Run(``, func(t *testing.T) {
+	t.Run(`Ensure WebServer is created with expected params`, func(t *testing.T) {
+
+		newQueue = func(url string) (monsterqueue.Queue, error) {
+			return nil, nil
+		}
+
+		newStorage = func(url string) (*mongodb.MongoDB, error) {
+			return nil, nil
+		}
 
 		assert.Nil(t, webserver)
 
@@ -37,6 +53,31 @@ func TestServerCommandPreRun(t *testing.T) {
 		}
 
 		assert.Equal(t, expected, webserver)
+	})
+
+	t.Run(`Ensure newQueue and newStorage are called with expected param`, func(t *testing.T) {
+
+		gotStorageURL := ""
+		gotQueueURL := ""
+
+		newQueue = func(url string) (monsterqueue.Queue, error) {
+			gotQueueURL = url
+
+			return nil, nil
+		}
+
+		newStorage = func(url string) (*mongodb.MongoDB, error) {
+			gotStorageURL = url
+
+			return nil, nil
+		}
+
+		viper.Set("server.database", "mongodb://localhost/")
+
+		serverCommandPreRun(nil, []string{})
+
+		assert.Equal(t, gotQueueURL, viper.Get("server.database"))
+		assert.Equal(t, gotStorageURL, viper.Get("server.database"))
 	})
 }
 
@@ -163,11 +204,13 @@ func TestNew(t *testing.T) {
 			[]string{
 				"--cert-file", "/path/to/cert.pem",
 				"--key-file", "/path/to/key.pem",
+				"--database", "mongodb://127.0.0.1:27017/",
 			},
 			[]string{
 				"--cert-file", "/path/to/cert.pem",
 				"--key-file", "/path/to/key.pem",
 				"--port", "443",
+				"--database", "mongodb://127.0.0.1:27017/",
 			},
 		}
 
