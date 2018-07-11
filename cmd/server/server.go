@@ -102,4 +102,5 @@ func serverCommandRun(cmd *cobra.Command, args []string) {
 	signal.Stop(signalChan)
 
 	webserver.Shutdown()
+	db.GetStorage().Close()
 }

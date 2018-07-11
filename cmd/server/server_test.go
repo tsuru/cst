@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/tsuru/cst/api"
+	"github.com/tsuru/cst/db"
 	"github.com/tsuru/cst/db/mongodb"
 	"github.com/tsuru/monsterqueue"
 )
@@ -83,10 +84,12 @@ func TestServerCommandPreRun(t *testing.T) {
 
 func TestServerCommandRun(t *testing.T) {
 
-	t.Run(`When webserver.Start correctly, receives a SIGINT, should stops the webserver gracefully`, func(t *testing.T) {
+	t.Run(`When webserver.Start correctly, receives a SIGINT, should stops the webserver and storage gracefully`, func(t *testing.T) {
 
 		webserverIsStarted := false
 		webserverIsStopped := false
+
+		storageIsStopped := false
 
 		webserver = &api.MockWebServer{
 			MockStart: func() error {
@@ -104,6 +107,14 @@ func TestServerCommandRun(t *testing.T) {
 			},
 		}
 
+		storage := &db.MockStorage{
+			MockClose: func() {
+				storageIsStopped = true
+			},
+		}
+
+		db.SetStorage(storage)
+
 		go serverCommandRun(nil, []string{})
 
 		time.Sleep(time.Second)
@@ -116,11 +127,14 @@ func TestServerCommandRun(t *testing.T) {
 		time.Sleep(time.Second)
 
 		assert.True(t, webserverIsStopped)
+		assert.True(t, storageIsStopped)
 	})
 
-	t.Run(`When webserver.Start returns an error, should calls webserver.Shutdown internally`, func(t *testing.T) {
+	t.Run(`When webserver.Start returns an error, should calls webserver.Shutdown and storage.Close internally`, func(t *testing.T) {
 
 		webserverIsStopped := false
+
+		storageIsStopped := false
 
 		webserver = &api.MockWebServer{
 			MockStart: func() error {
@@ -133,16 +147,27 @@ func TestServerCommandRun(t *testing.T) {
 			},
 		}
 
+		storage := &db.MockStorage{
+			MockClose: func() {
+				storageIsStopped = true
+			},
+		}
+
+		db.SetStorage(storage)
+
 		go serverCommandRun(nil, []string{})
 
 		time.Sleep(time.Second)
 
 		assert.True(t, webserverIsStopped)
+		assert.True(t, storageIsStopped)
 	})
 
-	t.Run(`When webserver.Start doesn't hold the execution, should calls webserver.Shutdown internally`, func(t *testing.T) {
+	t.Run(`When webserver.Start doesn't hold the execution, should calls webserver.Shutdown and storage.Close internally`, func(t *testing.T) {
 
 		webserverIsStopped := false
+
+		storageIsStopped := false
 
 		webserver = &api.MockWebServer{
 			MockStart: func() error {
@@ -150,18 +175,26 @@ func TestServerCommandRun(t *testing.T) {
 			},
 
 			MockShutdown: func() error {
-
 				webserverIsStopped = true
 
 				return nil
 			},
 		}
 
+		storage := &db.MockStorage{
+			MockClose: func() {
+				storageIsStopped = true
+			},
+		}
+
+		db.SetStorage(storage)
+
 		go serverCommandRun(nil, []string{})
 
 		time.Sleep(time.Second)
 
 		assert.True(t, webserverIsStopped)
+		assert.True(t, storageIsStopped)
 	})
 }
 
