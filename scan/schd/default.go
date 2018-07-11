@@ -1,6 +1,15 @@
 package schd
 
-import "github.com/tsuru/cst/scan"
+import (
+	"time"
+
+	"github.com/tsuru/monsterqueue"
+
+	uuid "github.com/satori/go.uuid"
+	"github.com/tsuru/cst/db"
+	"github.com/tsuru/cst/queue"
+	"github.com/tsuru/cst/scan"
+)
 
 // DefaultScheduler implements a Scheduler interface.
 type DefaultScheduler struct{}
@@ -10,5 +19,37 @@ type DefaultScheduler struct{}
 // wrong state.
 func (ds *DefaultScheduler) Schedule(image string) (scan.Scan, error) {
 
-	return scan.Scan{}, nil
+	storage := db.GetStorage()
+
+	if storage.HasScheduledScanByImage(image) {
+		return scan.Scan{}, ErrImageHasAlreadyBeenSchedule
+	}
+
+	newScan := scan.Scan{
+		ID:        uuid.NewV4().String(),
+		Status:    scan.StatusScheduled,
+		Image:     image,
+		CreatedAt: time.Now(),
+		Result:    []scan.Result{},
+	}
+
+	if err := storage.Save(newScan); err != nil {
+		return scan.Scan{}, err
+	}
+
+	enqueueScan(newScan)
+
+	return newScan, nil
+}
+
+func enqueueScan(scan scan.Scan) {
+
+	q := queue.GetQueue()
+
+	params := monsterqueue.JobParams{
+		"id":    scan.ID,
+		"image": scan.Image,
+	}
+
+	q.Enqueue(queue.ScanTaskName, params)
 }
