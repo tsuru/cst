@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tsuru/cst/cmd/server"
+	"github.com/tsuru/cst/cmd/worker"
 )
 
 // Execute calls the CLI entrypoint. If fired subcommand returns any error, so
@@ -25,6 +26,7 @@ func newRootCommand() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(server.New())
+	rootCmd.AddCommand(worker.New())
 
 	return rootCmd
 }
