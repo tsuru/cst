@@ -23,7 +23,8 @@ lint:
 
 test-with-coverage:
 	$(GO) test -v -cover -coverprofile=$(COVERAGE_FILE) ./...
-	$(GO) tool cover -func=$(COVERAGE_FILE)
+	grep -v "mock.go" $(COVERAGE_FILE) > fixed-$(COVERAGE_FILE)
+	$(GO) tool cover -func=fixed-$(COVERAGE_FILE)
 
 get-dev-deps:
 	$(GO) get -u golang.org/x/lint/golint
