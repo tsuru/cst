@@ -4,8 +4,10 @@ import "github.com/tsuru/cst/scan"
 
 // Storage represents a persistent data store.
 type Storage interface {
+	AppendResultToScanByID(string, scan.Result) error
 	Close()
 	HasScheduledScanByImage(string) bool
+	UpdateScanStatusByID(string, scan.Status) error
 	Save(scan.Scan) error
 }
 
