@@ -11,6 +11,10 @@ import (
 
 var scheduler schd.Scheduler
 
+func init() {
+	scheduler = &schd.DefaultScheduler{}
+}
+
 type scanRequest struct {
 	Image string `json:"image"`
 }
