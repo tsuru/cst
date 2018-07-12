@@ -60,3 +60,7 @@
 [[constraint]]
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/optiopay/klar"
+  version = "2.2.0"

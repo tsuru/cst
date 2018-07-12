@@ -2,6 +2,16 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/coreos/clair"
+  packages = [
+    "api/v3/clairpb",
+    "database",
+    "ext/versionfmt"
+  ]
+  revision = "158bb31b77159f8628186f6113f53e2dcb273189"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -30,6 +40,31 @@
     "internal/scram"
   ]
   revision = "113d3961e7311526535a1ef7042196563d442761"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = [
+    "jsonpb",
+    "proto",
+    "protoc-gen-go/descriptor",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/struct",
+    "ptypes/timestamp"
+  ]
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/grpc-ecosystem/grpc-gateway"
+  packages = [
+    "runtime",
+    "runtime/internal",
+    "utilities"
+  ]
+  revision = "92583770e3f01b09a0d3e9bdf64321d8bebd48f2"
+  version = "v1.4.1"
 
 [[projects]]
   branch = "master"
@@ -97,6 +132,16 @@
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
+
+[[projects]]
+  name = "github.com/optiopay/klar"
+  packages = [
+    "clair",
+    "docker",
+    "utils"
+  ]
+  revision = "6f9c0bd7d9d5f28ad8c05682ef7ef3b8ffaa5898"
+  version = "v2.2.0"
 
 [[projects]]
   name = "github.com/pelletier/go-toml"
@@ -201,6 +246,20 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "http/httpguts",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "internal/timeseries",
+    "trace"
+  ]
+  revision = "cffdcf672aee934982473246bc7e9a8ba446aa9b"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -211,15 +270,64 @@
 [[projects]]
   name = "golang.org/x/text"
   packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
     "internal/gen",
+    "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "language",
+    "secure/bidirule",
     "transform",
+    "unicode/bidi",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
+    "unicode/rangetable"
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = [
+    "googleapis/api/annotations",
+    "googleapis/rpc/status"
+  ]
+  revision = "e92b116572682a5b432ddd840aeaba2a559eeff1"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/grpcrand",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+    "transport"
+  ]
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
+  version = "v1.13.0"
 
 [[projects]]
   branch = "v2"
@@ -242,6 +350,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "92bf2bc3bcc6938a216e2dc3fc440ebb0d5461fa2414ad90981e9ea818f66434"
+  inputs-digest = "46f165c321496f80b9d1608d6092f94e98f9ea84643e428bebed876562785f67"
   solver-name = "gps-cdcl"
   solver-version = 1
