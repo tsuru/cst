@@ -36,7 +36,7 @@ func TestDefaultScheduler_Schedule(t *testing.T) {
 		_, err := ds.Schedule("tsuru/cst:latest")
 
 		if assert.Error(t, err) {
-			assert.Equal(t, ErrImageHasAlreadyBeenSchedule, err)
+			assert.Equal(t, ErrImageHasAlreadyBeenScheduled, err)
 		}
 	})
 
