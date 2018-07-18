@@ -96,7 +96,7 @@ func TestCreateScan(t *testing.T) {
 
 		scheduler = &schd.MockScheduler{
 			MockSchedule: func(image string) (scan.Scan, error) {
-				return scan.Scan{}, schd.ErrImageHasAlreadyBeenSchedule
+				return scan.Scan{}, schd.ErrImageHasAlreadyBeenScheduled
 			},
 		}
 

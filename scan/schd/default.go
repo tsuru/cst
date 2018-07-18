@@ -22,7 +22,7 @@ func (ds *DefaultScheduler) Schedule(image string) (scan.Scan, error) {
 	storage := db.GetStorage()
 
 	if storage.HasScheduledScanByImage(image) {
-		return scan.Scan{}, ErrImageHasAlreadyBeenSchedule
+		return scan.Scan{}, ErrImageHasAlreadyBeenScheduled
 	}
 
 	newScan := scan.Scan{

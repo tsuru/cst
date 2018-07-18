@@ -41,7 +41,7 @@ func createScan(ctx echo.Context) error {
 	case nil:
 		return ctx.JSON(http.StatusCreated, scan)
 
-	case schd.ErrImageHasAlreadyBeenSchedule:
+	case schd.ErrImageHasAlreadyBeenScheduled:
 		return ctx.NoContent(http.StatusNoContent)
 
 	default:
