@@ -4,9 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tsuru/cst/scan/schd"
-
 	"github.com/labstack/echo"
+	schd "github.com/tsuru/cst/scan/scheduler"
 )
 
 var scheduler schd.Scheduler

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tsuru/cst/scan"
-	"github.com/tsuru/cst/scan/schd"
+	schd "github.com/tsuru/cst/scan/scheduler"
 
 	"github.com/labstack/echo"
 )
