@@ -1,4 +1,4 @@
-package schd
+package scheduler
 
 import (
 	"errors"
