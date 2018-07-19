@@ -27,7 +27,14 @@ func (st *ScanTask) Run(job monsterqueue.Job) {
 
 	storage := db.GetStorage()
 
-	storage.UpdateScanStatusByID(scanID, scan.StatusRunning)
+	err := storage.UpdateScanStatusByID(scanID, scan.StatusRunning)
+
+	if err != nil {
+		log.WithError(err).Error("could not update scan's status on storage")
+		job.Error(err)
+
+		return
+	}
 
 	results := make([]scan.Result, len(st.Scanners))
 
@@ -36,10 +43,23 @@ func (st *ScanTask) Run(job monsterqueue.Job) {
 		result := scanner.Scan(image)
 		results[index] = result
 
-		storage.AppendResultToScanByID(scanID, result)
+		err = storage.AppendResultToScanByID(scanID, result)
+
+		if err != nil {
+			log.
+				WithError(err).
+				Error("could not update scan's result with analysis result")
+		}
 	}
 
-	storage.UpdateScanStatusByID(scanID, scan.StatusFinished)
+	err = storage.UpdateScanStatusByID(scanID, scan.StatusFinished)
+
+	if err != nil {
+		log.WithError(err).Error("could not update scan's status on storage")
+		job.Error(err)
+
+		return
+	}
 
 	job.Success(results)
 }
