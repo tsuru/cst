@@ -135,7 +135,7 @@ func TestCreateScan(t *testing.T) {
 	})
 
 	t.Run(`When payload contains endcustomdata, decodes it and posts a scan`, func(t *testing.T) {
-		requestBody := `{"endcustomdata": "IQAAAAJpbWFnZQARAAAAdHN1cnUvY3N0OmxhdGVzdAAA"}`
+		requestBody := `{"endcustomdata": "IQAAAAJpbWFnZQARAAAAdHN1cnUvY3N0OmxhdGVzdAAA", "image": ""}`
 
 		e := echo.New()
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(requestBody))
@@ -174,5 +174,26 @@ func TestCreateScan(t *testing.T) {
 		require.Error(t, err)
 		e.HTTPErrorHandler(err, context)
 		require.Equal(t, http.StatusBadRequest, recorder.Code)
+	})
+
+	t.Run(`When payload contains both image and endcustomdata, ignores endcustomdata`, func(t *testing.T) {
+		requestBody := `{"image": "tsuru/cst:latest", "endcustomdata": "invalid_data"}`
+
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(requestBody))
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		recorder := httptest.NewRecorder()
+		context := e.NewContext(request, recorder)
+		scheduler = &schd.MockScheduler{
+			MockSchedule: func(image string) (scan.Scan, error) {
+				require.Equal(t, "tsuru/cst:latest", image)
+				return scan.Scan{}, nil
+			},
+		}
+		err := createScan(context)
+
+		require.Nil(t, err)
+		e.HTTPErrorHandler(err, context)
+		require.Equal(t, http.StatusCreated, recorder.Code)
 	})
 }

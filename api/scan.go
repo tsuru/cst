@@ -56,14 +56,14 @@ func loadScanRequestFromContext(ctx echo.Context) (*scanRequest, error) {
 		return nil, echo.NewHTTPError(http.StatusBadRequest)
 	}
 	scanRequest := &scanRequest{}
-	if evt.EndCustomData != "" {
+	if evt.Image != "" {
+		scanRequest.Image = evt.scanRequest.Image
+	} else {
 		img, err := unmarshalImage(evt)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		scanRequest.Image = img
-	} else {
-		scanRequest.Image = evt.scanRequest.Image
 	}
 	return scanRequest, nil
 }
