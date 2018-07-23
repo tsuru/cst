@@ -4,24 +4,21 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/tsuru/monsterqueue"
-
 	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	"github.com/tsuru/cst/db"
 	"github.com/tsuru/cst/queue"
 	"github.com/tsuru/cst/scan"
+	"github.com/tsuru/monsterqueue"
 )
 
 func TestDefaultScheduler_Schedule(t *testing.T) {
-
 	defer func() {
 		db.SetStorage(nil)
 		queue.SetQueue(nil)
 	}()
 
 	t.Run(`When scanning an image is already scheduled, should return ErrImageHasAlreadyBeenScheduled error`, func(t *testing.T) {
-
 		queue.SetQueue(&queue.MockQueue{})
 
 		storage := &db.MockStorage{
@@ -35,13 +32,11 @@ func TestDefaultScheduler_Schedule(t *testing.T) {
 		ds := &DefaultScheduler{}
 		_, err := ds.Schedule("tsuru/cst:latest")
 
-		if assert.Error(t, err) {
-			assert.Equal(t, ErrImageHasAlreadyBeenScheduled, err)
-		}
+		require.Error(t, err)
+		assert.Equal(t, ErrImageHasAlreadyBeenScheduled, err)
 	})
 
 	t.Run(`When scanning a new image, should return a new instance of Scan and no errors`, func(t *testing.T) {
-
 		queue.SetQueue(&queue.MockQueue{})
 
 		storage := &db.MockStorage{
@@ -56,15 +51,13 @@ func TestDefaultScheduler_Schedule(t *testing.T) {
 
 		newScan, err := ds.Schedule("tsuru/cst:latest")
 
-		if assert.NoError(t, err) {
-			assert.NotEmpty(t, newScan.ID)
-			assert.Equal(t, string(scan.StatusScheduled), string(newScan.Status))
-			assert.Equal(t, "tsuru/cst:latest", newScan.Image)
-		}
+		require.NoError(t, err)
+		assert.NotEmpty(t, newScan.ID)
+		assert.Equal(t, string(scan.StatusScheduled), string(newScan.Status))
+		assert.Equal(t, "tsuru/cst:latest", newScan.Image)
 	})
 
 	t.Run(`When scanning a new image, when storage returns error on storage.Save method, shoul return an error`, func(t *testing.T) {
-
 		queue.SetQueue(&queue.MockQueue{})
 
 		storage := &db.MockStorage{
@@ -83,11 +76,10 @@ func TestDefaultScheduler_Schedule(t *testing.T) {
 
 		_, err := ds.Schedule("tsuru/cst:latest")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run(`Ensure queue.Enqueue is called with expected params`, func(t *testing.T) {
-
 		gotTaskName := ""
 		gotParams := monsterqueue.JobParams{}
 

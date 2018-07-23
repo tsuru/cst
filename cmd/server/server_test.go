@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/tsuru/cst/api"
@@ -18,7 +17,6 @@ import (
 )
 
 func TestServerCommandPreRun(t *testing.T) {
-
 	oldNewQueue := newQueue
 	oldNewStorage := newStorage
 
@@ -30,7 +28,6 @@ func TestServerCommandPreRun(t *testing.T) {
 	}()
 
 	t.Run(`Ensure WebServer is created with expected params`, func(t *testing.T) {
-
 		newQueue = func(url string) (monsterqueue.Queue, error) {
 			return nil, nil
 		}
@@ -57,7 +54,6 @@ func TestServerCommandPreRun(t *testing.T) {
 	})
 
 	t.Run(`Ensure newQueue and newStorage are called with expected param`, func(t *testing.T) {
-
 		gotStorageURL := ""
 		gotQueueURL := ""
 
@@ -83,9 +79,7 @@ func TestServerCommandPreRun(t *testing.T) {
 }
 
 func TestServerCommandRun(t *testing.T) {
-
 	t.Run(`When webserver.Start correctly, receives a SIGINT, should stops the webserver and storage gracefully`, func(t *testing.T) {
-
 		webserverIsStarted := false
 		webserverIsStopped := false
 
@@ -131,7 +125,6 @@ func TestServerCommandRun(t *testing.T) {
 	})
 
 	t.Run(`When webserver.Start returns an error, should calls webserver.Shutdown and storage.Close internally`, func(t *testing.T) {
-
 		webserverIsStopped := false
 
 		storageIsStopped := false
@@ -164,7 +157,6 @@ func TestServerCommandRun(t *testing.T) {
 	})
 
 	t.Run(`When webserver.Start doesn't hold the execution, should calls webserver.Shutdown and storage.Close internally`, func(t *testing.T) {
-
 		webserverIsStopped := false
 
 		storageIsStopped := false
@@ -199,9 +191,7 @@ func TestServerCommandRun(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-
 	t.Run(`When required args are not assigned, should retuns a error`, func(t *testing.T) {
-
 		errorArgs := [][]string{
 			[]string{},
 			[]string{
@@ -232,7 +222,6 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run(`When all required parameters are defined, should returns no errors`, func(t *testing.T) {
-
 		successfulArgs := [][]string{
 			[]string{
 				"--cert-file", "/path/to/cert.pem",
