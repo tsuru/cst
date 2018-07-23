@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/globalsign/mgo"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/tsuru/cst/scan"
-
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tsuru/cst/scan"
 )
 
 func init() {
@@ -16,7 +15,6 @@ func init() {
 }
 
 func TestMongoDB_Save(t *testing.T) {
-
 	if !viper.IsSet("STORAGE_URL") {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
@@ -35,7 +33,6 @@ func TestMongoDB_Save(t *testing.T) {
 	}()
 
 	t.Run(`When a scan document already exists on datastore, should only update that document`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -69,7 +66,6 @@ func TestMongoDB_Save(t *testing.T) {
 	})
 
 	t.Run(`When a scan document not exists on datastore, should inserts it`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -99,7 +95,6 @@ func TestMongoDB_Save(t *testing.T) {
 }
 
 func TestMongoDB_Close(t *testing.T) {
-
 	if !viper.IsSet("STORAGE_URL") {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
@@ -111,7 +106,6 @@ func TestMongoDB_Close(t *testing.T) {
 	}
 
 	t.Run(`Ensure any command issued after MongoDB.Close should panic the execution`, func(t *testing.T) {
-
 		assert.Panics(t, func() {
 			mongo.Close()
 
@@ -121,7 +115,6 @@ func TestMongoDB_Close(t *testing.T) {
 }
 
 func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
-
 	if !viper.IsSet("STORAGE_URL") {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
@@ -133,7 +126,6 @@ func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
 	}
 
 	t.Run(`When exists a scan document with same image and status scheduled, should return true`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -150,7 +142,6 @@ func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
 	})
 
 	t.Run(`When exist a scan document but with status non-scheduled, should return false`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -169,7 +160,6 @@ func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
 }
 
 func TestMongoDB_AppendResultToScanByID(t *testing.T) {
-
 	if !viper.IsSet("STORAGE_URL") {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
@@ -181,7 +171,6 @@ func TestMongoDB_AppendResultToScanByID(t *testing.T) {
 	}
 
 	t.Run(`When a scan has no results yet, should return one result after`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -206,16 +195,13 @@ func TestMongoDB_AppendResultToScanByID(t *testing.T) {
 			Vulnerabilities: "all-vulns-described-here",
 		})
 
-		if assert.NoError(t, err) {
-			scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
-
-			assert.Equal(t, 1, len(scanOnStorage.Result))
-		}
+		require.NoError(t, err)
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+		assert.Equal(t, 1, len(scanOnStorage.Result))
 	})
 }
 
 func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
-
 	if !viper.IsSet("STORAGE_URL") {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
@@ -227,7 +213,6 @@ func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
 	}
 
 	t.Run(`When updating scan to running status, should update scan status to running`, func(t *testing.T) {
-
 		scanColl := mongo.getScanCollection()
 
 		defer func() {
@@ -248,10 +233,8 @@ func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
 
 		err := mongo.UpdateScanStatusByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.StatusRunning)
 
-		if assert.NoError(t, err) {
-			scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
-
-			assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
-		}
+		require.NoError(t, err)
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+		assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
 	})
 }

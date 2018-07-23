@@ -16,9 +16,7 @@ import (
 )
 
 func TestWorkerCommandPreRun(t *testing.T) {
-
 	t.Run(`Ensure newQueue and newStorage are called with expected param`, func(t *testing.T) {
-
 		gotStorageURL := ""
 		gotQueueURL := ""
 
@@ -44,9 +42,7 @@ func TestWorkerCommandPreRun(t *testing.T) {
 }
 
 func TestWorkerCommandRun(t *testing.T) {
-
 	t.Run(`Ensure queue.ProcessLoop is called, when receive a INT singnal should calls storage.Close`, func(t *testing.T) {
-
 		hasCalledProcessLoop := false
 		hasCalledStorageClose := false
 
@@ -82,9 +78,7 @@ func TestWorkerCommandRun(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-
 	t.Run(`When required args are not assigned, should retuns a error`, func(t *testing.T) {
-
 		errorArgs := [][]string{
 			[]string{},
 			[]string{
@@ -109,7 +103,6 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run(`When all required parameters are defined, should returns no errors`, func(t *testing.T) {
-
 		successfulArgs := [][]string{
 			[]string{
 				"--database", "mongodb://127.0.0.1:27017/",

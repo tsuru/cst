@@ -16,55 +16,39 @@ import (
 
 func TestCreateScan(t *testing.T) {
 	t.Run(`When payload is empty, should return a bad request response`, func(t *testing.T) {
-
 		e := echo.New()
-
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(``))
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 		recorder := httptest.NewRecorder()
-
 		context := e.NewContext(request, recorder)
-
 		err := createScan(context)
 
-		if assert.Error(t, err) {
-			e.HTTPErrorHandler(err, context)
-			assert.Equal(t, http.StatusBadRequest, recorder.Code)
-		}
+		require.Error(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	})
 
 	t.Run(`When image value contains only spaces, should return bad request`, func(t *testing.T) {
 		e := echo.New()
-
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{ "image" : "    " }`))
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 		recorder := httptest.NewRecorder()
-
 		context := e.NewContext(request, recorder)
-
 		err := createScan(context)
 
-		if assert.Error(t, err) {
-			e.HTTPErrorHandler(err, context)
-			assert.Equal(t, http.StatusBadRequest, recorder.Code)
-		}
+		require.Error(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	})
 
 	t.Run(`When payload is OK, should return created status code`, func(t *testing.T) {
-
 		requestBody := `{ "image": "tsuru/cst:latest" }`
 
 		e := echo.New()
-
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(requestBody))
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 		recorder := httptest.NewRecorder()
-
 		context := e.NewContext(request, recorder)
-
 		scheduler = &schd.MockScheduler{
 			MockSchedule: func(image string) (scan.Scan, error) {
 				return scan.Scan{
@@ -75,63 +59,48 @@ func TestCreateScan(t *testing.T) {
 			},
 		}
 
-		if assert.NoError(t, createScan(context)) {
-			assert.Equal(t, http.StatusCreated, recorder.Code)
-		}
+		require.NoError(t, createScan(context))
+		assert.Equal(t, http.StatusCreated, recorder.Code)
 	})
 
 	t.Run(`When scheduler returns an ErrImageHasAlreadyBeenScheduled error, should return NoContent status code`, func(t *testing.T) {
-
 		requestBody := `{ "image": "tsuru/cst:latest" }`
 
 		e := echo.New()
-
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(requestBody))
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 		recorder := httptest.NewRecorder()
-
 		context := e.NewContext(request, recorder)
-
 		scheduler = &schd.MockScheduler{
 			MockSchedule: func(image string) (scan.Scan, error) {
 				return scan.Scan{}, schd.ErrImageHasAlreadyBeenScheduled
 			},
 		}
-
 		err := createScan(context)
 
-		if assert.NoError(t, err) {
-			e.HTTPErrorHandler(err, context)
-			assert.Equal(t, http.StatusNoContent, recorder.Code)
-		}
+		require.NoError(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusNoContent, recorder.Code)
 	})
 
 	t.Run(`When payload is OK and scheduler return an error, should return Internal Server Error`, func(t *testing.T) {
-
 		requestBody := `{ "image": "tsuru/cst:latest" }`
 
 		e := echo.New()
-
 		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(requestBody))
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 		recorder := httptest.NewRecorder()
-
 		context := e.NewContext(request, recorder)
-
 		scheduler = &schd.MockScheduler{
 			MockSchedule: func(image string) (scan.Scan, error) {
 				return scan.Scan{}, errors.New("something went wrong")
 			},
 		}
-
 		err := createScan(context)
 
-		if assert.Error(t, err) {
-			e.HTTPErrorHandler(err, context)
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-		}
+		require.Error(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	})
 
 	t.Run(`When payload contains endcustomdata, decodes it and posts a scan`, func(t *testing.T) {

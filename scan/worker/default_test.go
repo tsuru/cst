@@ -12,18 +12,14 @@ import (
 )
 
 func TestScanTask_Name(t *testing.T) {
-
 	t.Run(`Ensure name returned by scanTaks.Name method`, func(t *testing.T) {
-
 		st := &ScanTask{}
 		assert.Equal(t, queue.ScanTaskName, st.Name())
 	})
 }
 
 func TestScanTask_Run(t *testing.T) {
-
 	t.Run(`Ensure expected methods ared correctly called`, func(t *testing.T) {
-
 		gotImageOnScanner := ""
 		gotResult := scan.Result{}
 		gotStatus := scan.Status("")
@@ -34,7 +30,6 @@ func TestScanTask_Run(t *testing.T) {
 			Scanners: []scan.Scanner{
 				&scan.MockScanner{
 					MockScan: func(image string) scan.Result {
-
 						gotImageOnScanner = image
 
 						return scan.Result{
@@ -54,7 +49,6 @@ func TestScanTask_Run(t *testing.T) {
 			},
 
 			MockSucess: func(result monsterqueue.JobResult) (bool, error) {
-
 				wasSuccessful = true
 
 				return false, nil
@@ -63,13 +57,11 @@ func TestScanTask_Run(t *testing.T) {
 
 		storage := &db.MockStorage{
 			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
-
 				gotStatus = status
 
 				return nil
 			},
 			MockAppendResultToScanByID: func(id string, result scan.Result) error {
-
 				gotResult = result
 
 				return nil
@@ -87,12 +79,10 @@ func TestScanTask_Run(t *testing.T) {
 	})
 
 	t.Run(`When storage returns any error on UpdateScanStatusByID method with scan.StatusRunning param, should abort execution and call the job.Error method`, func(t *testing.T) {
-
 		gotJobError := false
 
 		storage := &db.MockStorage{
 			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
-
 				if status == scan.StatusRunning {
 					return errors.New("just another error on storage")
 				}
@@ -130,7 +120,6 @@ func TestScanTask_Run(t *testing.T) {
 
 		storage := &db.MockStorage{
 			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
-
 				if status == scan.StatusFinished {
 					return errors.New("just another error on storage")
 				}
