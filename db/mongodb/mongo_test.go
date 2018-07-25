@@ -238,3 +238,64 @@ func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
 		assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
 	})
 }
+
+func TestMongoDB_GetScansByImage(t *testing.T) {
+	if !viper.IsSet("STORAGE_URL") {
+		t.Skip("mongodb connection url are not assigned, skipping integration tests")
+	}
+
+	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+
+	if err != nil {
+		assert.FailNow(t, "could not connect with mongodb")
+	}
+
+	defer func() {
+		mongo.Close()
+	}()
+
+	t.Run(`When there are no scan documents, should return no error and a empty scans slice`, func(t *testing.T) {
+		scans, err := mongo.GetScansByImage("tsuru/cst:latest")
+
+		require.NoError(t, err)
+		assert.Empty(t, scans)
+	})
+
+	t.Run(`Ensure expected scan documents are returned`, func(t *testing.T) {
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scansOnStorage := []scan.Scan{
+			scan.Scan{
+				ID:    "1",
+				Image: "tsuru/cst:latest",
+			},
+			scan.Scan{
+				ID:    "2",
+				Image: "tsuru/cst:v10",
+			},
+			scan.Scan{
+				ID:    "3",
+				Image: "tsuru/cst:latest",
+			},
+		}
+
+		scanColl.Insert(scansOnStorage[0], scansOnStorage[1], scansOnStorage[2])
+
+		gotScans, err := mongo.GetScansByImage("tsuru/cst:latest")
+
+		require.NoError(t, err)
+		assert.Equal(t, 2, len(gotScans))
+
+		expectedScans := []scan.Scan{
+			scansOnStorage[0],
+			scansOnStorage[2],
+		}
+
+		assert.ElementsMatch(t, expectedScans, gotScans)
+	})
+}
