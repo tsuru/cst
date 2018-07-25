@@ -1,4 +1,5 @@
 GO ?= go
+GOROOT ?= $(shell $(GO) env GOROOT)
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 
@@ -9,8 +10,10 @@ COVERAGE_FILE ?= coverage.out
 
 CSTBIN ?= cst
 CSTMAIN = main.go
+CST_CERTS_DIR ?= .certs
 
 .PHONY: build get-dev-deps lint test test-with-coverage
+		generate-self-signed-certificate
 
 build:
 	$(GODEP) ensure
@@ -29,3 +32,8 @@ test-with-coverage:
 get-dev-deps:
 	$(GO) get -u golang.org/x/lint/golint
 	$(GO) get -u github.com/golang/dep/cmd/dep
+
+generate-self-signed-certificate:
+	mkdir -p $(CST_CERTS_DIR)
+	$(GO) run $(GOROOT)/src/crypto/tls/generate_cert.go --host localhost --ecdsa-curve P256
+	mv cert.pem key.pem $(CST_CERTS_DIR)
