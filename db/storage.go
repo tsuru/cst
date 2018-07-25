@@ -6,6 +6,7 @@ import "github.com/tsuru/cst/scan"
 type Storage interface {
 	AppendResultToScanByID(string, scan.Result) error
 	Close()
+	GetScansByImage(image string) ([]scan.Scan, error)
 	HasScheduledScanByImage(string) bool
 	UpdateScanStatusByID(string, scan.Status) error
 	Save(scan.Scan) error

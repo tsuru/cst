@@ -64,6 +64,19 @@ func (mongo *MongoDB) UpdateScanStatusByID(id string, status scan.Status) error 
 	return collection.UpdateId(id, bson.M{"$set": bson.M{"status": status}})
 }
 
+// GetScansByImage returns the list of scans that match a given image name.
+func (mongo *MongoDB) GetScansByImage(image string) ([]scan.Scan, error) {
+
+	collection := mongo.getScanCollection()
+	defer collection.Database.Session.Close()
+
+	var scans []scan.Scan
+
+	err := collection.Find(bson.M{"image": image}).All(&scans)
+
+	return scans, err
+}
+
 func (mongo *MongoDB) getScanCollection() *mgo.Collection {
 
 	session := mongo.session.Copy()

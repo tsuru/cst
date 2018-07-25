@@ -6,6 +6,7 @@ import "github.com/tsuru/cst/scan"
 type MockStorage struct {
 	MockAppendResultToScanByID  func(string, scan.Result) error
 	MockClose                   func()
+	MockGetScansByImage         func(string) ([]scan.Scan, error)
 	MockHasScheduledScanByImage func(string) bool
 	MockSave                    func(scan.Scan) error
 	MockUpdateScanStatusByID    func(string, scan.Status) error
@@ -27,6 +28,16 @@ func (ms *MockStorage) Close() {
 	if ms.MockClose != nil {
 		ms.MockClose()
 	}
+}
+
+// GetScansByImage is a mock implementation for testing purposes.
+func (ms *MockStorage) GetScansByImage(image string) ([]scan.Scan, error) {
+
+	if ms.MockGetScansByImage != nil {
+		return ms.MockGetScansByImage(image)
+	}
+
+	return []scan.Scan{}, nil
 }
 
 // HasScheduledScanByImage is a mock implementation for testing purposes.
