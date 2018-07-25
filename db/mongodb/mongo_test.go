@@ -15,15 +15,8 @@ func init() {
 }
 
 func TestMongoDB_Save(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
-
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	mongo := getMongoDBTestingInstance(t)
 
 	defer func() {
 		scanColl := mongo.getScanCollection()
@@ -95,15 +88,8 @@ func TestMongoDB_Save(t *testing.T) {
 }
 
 func TestMongoDB_Close(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
-
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	mongo := getMongoDBTestingInstance(t)
 
 	t.Run(`Ensure any command issued after MongoDB.Close should panic the execution`, func(t *testing.T) {
 		assert.Panics(t, func() {
@@ -115,15 +101,12 @@ func TestMongoDB_Close(t *testing.T) {
 }
 
 func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+	mongo := getMongoDBTestingInstance(t)
 
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	defer func() {
+		mongo.session.Close()
+	}()
 
 	t.Run(`When exists a scan document with same image and status scheduled, should return true`, func(t *testing.T) {
 		scanColl := mongo.getScanCollection()
@@ -160,15 +143,12 @@ func TestMongoDB_HasScheduledScanByImage(t *testing.T) {
 }
 
 func TestMongoDB_AppendResultToScanByID(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+	mongo := getMongoDBTestingInstance(t)
 
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	defer func() {
+		mongo.session.Close()
+	}()
 
 	t.Run(`When a scan has no results yet, should return one result after`, func(t *testing.T) {
 		scanColl := mongo.getScanCollection()
@@ -202,15 +182,12 @@ func TestMongoDB_AppendResultToScanByID(t *testing.T) {
 }
 
 func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+	mongo := getMongoDBTestingInstance(t)
 
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	defer func() {
+		mongo.session.Close()
+	}()
 
 	t.Run(`When updating scan to running status, should update scan status to running`, func(t *testing.T) {
 		scanColl := mongo.getScanCollection()
@@ -240,18 +217,11 @@ func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
 }
 
 func TestMongoDB_GetScansByImage(t *testing.T) {
-	if !viper.IsSet("STORAGE_URL") {
-		t.Skip("mongodb connection url are not assigned, skipping integration tests")
-	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
-
-	if err != nil {
-		assert.FailNow(t, "could not connect with mongodb")
-	}
+	mongo := getMongoDBTestingInstance(t)
 
 	defer func() {
-		mongo.Close()
+		mongo.session.Close()
 	}()
 
 	t.Run(`When there are no scan documents, should return no error and a empty scans slice`, func(t *testing.T) {
@@ -298,4 +268,17 @@ func TestMongoDB_GetScansByImage(t *testing.T) {
 
 		assert.ElementsMatch(t, expectedScans, gotScans)
 	})
+}
+
+func getMongoDBTestingInstance(t *testing.T) *MongoDB {
+
+	if !viper.IsSet("STORAGE_URL") {
+		t.Skip("mongodb connection url are not assigned, skipping integration tests")
+	}
+
+	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+
+	require.NoError(t, err, "could not connect with mongodb service")
+
+	return mongo
 }
