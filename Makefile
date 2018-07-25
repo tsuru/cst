@@ -16,7 +16,6 @@ CST_CERTS_DIR ?= .certs
 		generate-self-signed-certificate
 
 build:
-	$(GODEP) ensure
 	$(GO) build -o "$(CSTBIN)" $(CSTMAIN)
 
 test: lint test-with-coverage
