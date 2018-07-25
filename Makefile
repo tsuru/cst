@@ -9,14 +9,13 @@ GOLINT ?= $(GOBIN)/golint
 COVERAGE_FILE ?= coverage.out
 
 CSTBIN ?= cst
-CSTMAIN = main.go
 CST_CERTS_DIR ?= .certs
 
 .PHONY: build get-dev-deps lint test test-with-coverage
 		generate-self-signed-certificate
 
 build:
-	$(GO) build -o "$(CSTBIN)" $(CSTMAIN)
+	$(GO) build -o "$(CSTBIN)"
 
 test: lint test-with-coverage
 
