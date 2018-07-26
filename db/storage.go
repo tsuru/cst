@@ -9,6 +9,7 @@ type Storage interface {
 	GetScansByImage(image string) ([]scan.Scan, error)
 	HasScheduledScanByImage(string) bool
 	UpdateScanStatusByID(string, scan.Status) error
+	Ping() bool
 	Save(scan.Scan) error
 }
 
