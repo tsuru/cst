@@ -4,10 +4,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
+	"github.com/tsuru/cst/db"
 	schd "github.com/tsuru/cst/scan/scheduler"
 )
 
@@ -24,6 +26,23 @@ type scanRequest struct {
 type tsuruEvent struct {
 	scanRequest
 	EndCustomData string `json:"endcustomdata"`
+}
+
+func showScans(ctx echo.Context) error {
+
+	image, err := url.PathUnescape(ctx.Param("image"))
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	scans, err := db.GetStorage().GetScansByImage(image)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return ctx.JSON(http.StatusOK, scans)
 }
 
 func createScan(ctx echo.Context) error {

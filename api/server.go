@@ -38,6 +38,7 @@ func (ws *SecureWebServer) Start() error {
 
 	v1 := ws.echo.Group("/v1")
 	v1.POST("/container/scan", createScan)
+	v1.GET("/container/scan/:image", showScans)
 
 	address := fmt.Sprintf(":%d", ws.Port)
 
