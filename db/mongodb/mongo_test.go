@@ -270,6 +270,19 @@ func TestMongoDB_GetScansByImage(t *testing.T) {
 	})
 }
 
+func TestMongoDB_Ping(t *testing.T) {
+
+	mongo := getMongoDBTestingInstance(t)
+
+	defer func() {
+		mongo.session.Close()
+	}()
+
+	t.Run(`When database is online, should return true`, func(t *testing.T) {
+		assert.True(t, mongo.Ping())
+	})
+}
+
 func getMongoDBTestingInstance(t *testing.T) *MongoDB {
 
 	if !viper.IsSet("STORAGE_URL") {

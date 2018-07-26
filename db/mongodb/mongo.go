@@ -77,6 +77,13 @@ func (mongo *MongoDB) GetScansByImage(image string) ([]scan.Scan, error) {
 	return scans, err
 }
 
+// Ping is a wrapper to the mgo.session.Ping method. It returns true when the
+// ping command was correctly executed on the storage service, otherwise returns
+// false.
+func (mongo *MongoDB) Ping() bool {
+	return mongo.session.Ping() == nil
+}
+
 func (mongo *MongoDB) getScanCollection() *mgo.Collection {
 
 	session := mongo.session.Copy()

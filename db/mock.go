@@ -10,6 +10,7 @@ type MockStorage struct {
 	MockHasScheduledScanByImage func(string) bool
 	MockSave                    func(scan.Scan) error
 	MockUpdateScanStatusByID    func(string, scan.Status) error
+	MockPing                    func() bool
 }
 
 // AppendResultToScanByID is a mock implementation for testing purposes.
@@ -68,4 +69,14 @@ func (ms *MockStorage) UpdateScanStatusByID(id string, status scan.Status) error
 	}
 
 	return nil
+}
+
+// Ping is a mock implementation for testing purposes.
+func (ms *MockStorage) Ping() bool {
+
+	if ms.MockPing != nil {
+		return ms.MockPing()
+	}
+
+	return false
 }
