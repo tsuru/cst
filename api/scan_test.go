@@ -1,15 +1,18 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tsuru/cst/db"
 	"github.com/tsuru/cst/scan"
 	schd "github.com/tsuru/cst/scan/scheduler"
 )
@@ -164,5 +167,122 @@ func TestCreateScan(t *testing.T) {
 		require.Nil(t, err)
 		e.HTTPErrorHandler(err, context)
 		require.Equal(t, http.StatusCreated, recorder.Code)
+	})
+}
+
+func TestShowScans(t *testing.T) {
+
+	t.Run(`When there are no scans for a given image, should return 200 and an empty slice`, func(t *testing.T) {
+		storage := &db.MockStorage{
+			MockGetScansByImage: func(image string) ([]scan.Scan, error) {
+				return []scan.Scan{}, nil
+			},
+		}
+
+		db.SetStorage(storage)
+
+		e := echo.New()
+
+		request := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(``))
+		recorder := httptest.NewRecorder()
+
+		context := e.NewContext(request, recorder)
+
+		context.SetPath("/v1/container/scan/:image")
+		context.SetParamNames("image")
+		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
+
+		err := showScans(context)
+
+		require.NoError(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusOK, recorder.Code)
+
+		assert.JSONEq(t, `[]`, recorder.Body.String())
+	})
+
+	t.Run(`When image param is bad URL encoded, should return 400 status code`, func(t *testing.T) {
+		e := echo.New()
+
+		request := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(``))
+		recorder := httptest.NewRecorder()
+
+		context := e.NewContext(request, recorder)
+
+		context.SetPath("/v1/container/scan/:image")
+		context.SetParamNames("image")
+		context.SetParamValues("badUrlEncoded%ss")
+
+		err := showScans(context)
+
+		require.Error(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	})
+
+	t.Run(`When storage returns any error, should return 500 status code`, func(t *testing.T) {
+		storage := &db.MockStorage{
+			MockGetScansByImage: func(image string) ([]scan.Scan, error) {
+				return []scan.Scan{}, errors.New("just another error on storage")
+			},
+		}
+
+		db.SetStorage(storage)
+
+		e := echo.New()
+
+		request := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(``))
+		recorder := httptest.NewRecorder()
+
+		context := e.NewContext(request, recorder)
+
+		context.SetPath("/v1/container/scan/:image")
+		context.SetParamNames("image")
+		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
+
+		err := showScans(context)
+
+		require.Error(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+	})
+
+	t.Run(`When storage correctly returns scans, should return 200 status code and scans on body`, func(t *testing.T) {
+
+		expectedScans := []scan.Scan{
+			scan.Scan{
+				ID:    "1",
+				Image: "tsuru/cst:latest",
+			},
+		}
+
+		storage := &db.MockStorage{
+			MockGetScansByImage: func(image string) ([]scan.Scan, error) {
+				return expectedScans, nil
+			},
+		}
+
+		db.SetStorage(storage)
+
+		e := echo.New()
+
+		request := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(``))
+		recorder := httptest.NewRecorder()
+
+		context := e.NewContext(request, recorder)
+
+		context.SetPath("/v1/container/scan/:image")
+		context.SetParamNames("image")
+		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
+
+		err := showScans(context)
+
+		require.NoError(t, err)
+		e.HTTPErrorHandler(err, context)
+		assert.Equal(t, http.StatusOK, recorder.Code)
+
+		expectedScansJSON, _ := json.Marshal(expectedScans)
+
+		assert.JSONEq(t, string(expectedScansJSON), recorder.Body.String())
 	})
 }
