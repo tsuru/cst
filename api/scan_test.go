@@ -188,7 +188,7 @@ func TestShowScans(t *testing.T) {
 
 		context := e.NewContext(request, recorder)
 
-		context.SetPath("/v1/container/scan/:image")
+		context.SetPath("/v1/scan/:image")
 		context.SetParamNames("image")
 		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
 
@@ -209,7 +209,7 @@ func TestShowScans(t *testing.T) {
 
 		context := e.NewContext(request, recorder)
 
-		context.SetPath("/v1/container/scan/:image")
+		context.SetPath("/v1/scan/:image")
 		context.SetParamNames("image")
 		context.SetParamValues("badUrlEncoded%ss")
 
@@ -236,7 +236,7 @@ func TestShowScans(t *testing.T) {
 
 		context := e.NewContext(request, recorder)
 
-		context.SetPath("/v1/container/scan/:image")
+		context.SetPath("/v1/scan/:image")
 		context.SetParamNames("image")
 		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
 
@@ -271,7 +271,7 @@ func TestShowScans(t *testing.T) {
 
 		context := e.NewContext(request, recorder)
 
-		context.SetPath("/v1/container/scan/:image")
+		context.SetPath("/v1/scan/:image")
 		context.SetParamNames("image")
 		context.SetParamValues(url.PathEscape("tsuru/cst:latest"))
 
