@@ -36,6 +36,8 @@ func (ws *SecureWebServer) Start() error {
 	ws.echo.Use(middleware.Recover())
 	ws.echo.Use(middleware.Logger())
 
+	ws.echo.GET("/health", health)
+
 	v1 := ws.echo.Group("/v1")
 	v1.POST("/scan", createScan)
 	v1.GET("/scan/:image", showScans)
