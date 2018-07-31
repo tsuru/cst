@@ -31,12 +31,11 @@ func New() *cobra.Command {
 		PreRun: serverCommandPreRun,
 		Run:    serverCommandRun,
 		Args: func(cmd *cobra.Command, args []string) error {
-			flags := cmd.Flags()
-			if !flags.Lookup("insecure").Changed {
-				if !flags.Lookup("cert-file").Changed {
+			if !viper.GetBool("server.insecure") {
+				if len(viper.GetString("server.cert-file")) == 0 {
 					return errors.New("cert-file is required")
 				}
-				if !flags.Lookup("key-file").Changed {
+				if len(viper.GetString("server.key-file")) == 0 {
 					return errors.New("key-file is required")
 				}
 			}
