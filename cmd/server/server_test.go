@@ -48,6 +48,7 @@ func TestServerCommandPreRun(t *testing.T) {
 			CertFile: "/path/to/cert.pem",
 			KeyFile:  "/path/to/key.pem",
 			Port:     443,
+			UseTLS:   true,
 		}
 
 		assert.Equal(t, expected, webserver)
@@ -191,7 +192,7 @@ func TestServerCommandRun(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	t.Run(`When required args are not assigned, should retuns a error`, func(t *testing.T) {
+	t.Run(`When required args are not assigned, should return an error`, func(t *testing.T) {
 		errorArgs := [][]string{
 			[]string{},
 			[]string{
@@ -205,6 +206,9 @@ func TestNew(t *testing.T) {
 			},
 			[]string{
 				"--unknown-arg", "unknown-var",
+			},
+			[]string{
+				"--database", "dbhost",
 			},
 		}
 
@@ -221,7 +225,7 @@ func TestNew(t *testing.T) {
 		}
 	})
 
-	t.Run(`When all required parameters are defined, should returns no errors`, func(t *testing.T) {
+	t.Run(`When all required parameters are defined, should return no errors`, func(t *testing.T) {
 		successfulArgs := [][]string{
 			[]string{
 				"--cert-file", "/path/to/cert.pem",
@@ -233,6 +237,10 @@ func TestNew(t *testing.T) {
 				"--key-file", "/path/to/key.pem",
 				"--port", "443",
 				"--database", "mongodb://127.0.0.1:27017/",
+			},
+			[]string{
+				"--database", "mongodb://127.0.0.1:27017/",
+				"--insecure",
 			},
 		}
 

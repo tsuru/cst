@@ -10,7 +10,6 @@ import (
 // Execute calls the CLI entrypoint. If fired subcommand returns any error, so
 // logs the error on standard output and exit with non-zero code.
 func Execute() {
-
 	err := newRootCommand().Execute()
 
 	if err != nil {
@@ -19,7 +18,6 @@ func Execute() {
 }
 
 func newRootCommand() *cobra.Command {
-
 	rootCmd := &cobra.Command{
 		Use:  "cst",
 		Args: cobra.MinimumNArgs(1),
