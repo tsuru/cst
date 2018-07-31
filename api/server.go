@@ -21,6 +21,7 @@ type SecureWebServer struct {
 	CertFile string
 	KeyFile  string
 	Port     int
+	UseTLS   bool
 
 	echo *echo.Echo
 }
@@ -44,7 +45,10 @@ func (ws *SecureWebServer) Start() error {
 
 	address := fmt.Sprintf(":%d", ws.Port)
 
-	return ws.echo.StartTLS(address, ws.CertFile, ws.KeyFile)
+	if ws.UseTLS {
+		return ws.echo.StartTLS(address, ws.CertFile, ws.KeyFile)
+	}
+	return ws.echo.Start(address)
 }
 
 // Shutdown stops web server the gracefully. Error is returned when it can't
