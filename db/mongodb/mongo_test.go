@@ -11,7 +11,9 @@ import (
 )
 
 func init() {
-	viper.AutomaticEnv()
+	if viper.IsSet("STORAGE_URL") {
+		viper.AutomaticEnv()
+	}
 }
 
 func TestMongoDB_Save(t *testing.T) {
