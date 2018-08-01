@@ -25,6 +25,7 @@ func TestServerCommandPreRun(t *testing.T) {
 
 		newQueue = oldNewQueue
 		newStorage = oldNewStorage
+		viper.Reset()
 	}()
 
 	t.Run(`Ensure WebServer is created with expected params`, func(t *testing.T) {
@@ -221,7 +222,7 @@ func TestNew(t *testing.T) {
 			serverCmd.SetOutput(bytes.NewBufferString(""))
 			serverCmd.SetArgs(args)
 
-			assert.Error(t, serverCmd.Execute())
+			assert.Error(t, serverCmd.Execute(), "server should have returned an error with args: ", args)
 		}
 	})
 
