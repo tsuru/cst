@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/tsuru/cst/db"
 	"github.com/tsuru/cst/queue"
@@ -15,7 +17,6 @@ type ScanTask struct {
 
 // Run executes a scheduled scan over all scanners available.
 func (st *ScanTask) Run(job monsterqueue.Job) {
-
 	log := logrus.WithField("job.id", job.ID())
 
 	log.Info("initializing a new job")
@@ -27,7 +28,7 @@ func (st *ScanTask) Run(job monsterqueue.Job) {
 
 	storage := db.GetStorage()
 
-	err := storage.UpdateScanStatusByID(scanID, scan.StatusRunning)
+	err := storage.UpdateScanByID(scanID, scan.StatusRunning, nil)
 
 	if err != nil {
 		log.WithError(err).Error("could not update scan's status on storage")
@@ -52,7 +53,8 @@ func (st *ScanTask) Run(job monsterqueue.Job) {
 		}
 	}
 
-	err = storage.UpdateScanStatusByID(scanID, scan.StatusFinished)
+	now := time.Now()
+	err = storage.UpdateScanByID(scanID, scan.StatusFinished, &now)
 
 	if err != nil {
 		log.WithError(err).Error("could not update scan's status on storage")

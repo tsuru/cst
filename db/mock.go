@@ -1,6 +1,10 @@
 package db
 
-import "github.com/tsuru/cst/scan"
+import (
+	"time"
+
+	"github.com/tsuru/cst/scan"
+)
 
 // MockStorage implements a Storage interface for testing purposes.
 type MockStorage struct {
@@ -9,7 +13,7 @@ type MockStorage struct {
 	MockGetScansByImage         func(string) ([]scan.Scan, error)
 	MockHasScheduledScanByImage func(string) bool
 	MockSave                    func(scan.Scan) error
-	MockUpdateScanStatusByID    func(string, scan.Status) error
+	MockUpdateScanByID          func(string, scan.Status, *time.Time) error
 	MockPing                    func() bool
 }
 
@@ -61,11 +65,10 @@ func (ms *MockStorage) Save(s scan.Scan) error {
 	return nil
 }
 
-// UpdateScanStatusByID is a mock implementation for testing purposes.
-func (ms *MockStorage) UpdateScanStatusByID(id string, status scan.Status) error {
-
-	if ms.MockUpdateScanStatusByID != nil {
-		return ms.MockUpdateScanStatusByID(id, status)
+// UpdateScanByID is a mock implementation for testing purposes.
+func (ms *MockStorage) UpdateScanByID(id string, status scan.Status, finishedAt *time.Time) error {
+	if ms.MockUpdateScanByID != nil {
+		return ms.MockUpdateScanByID(id, status, finishedAt)
 	}
 
 	return nil

@@ -1,6 +1,8 @@
 package mongodb
 
 import (
+	"time"
+
 	"github.com/globalsign/mgo"
 	"github.com/tsuru/cst/scan"
 	"gopkg.in/mgo.v2/bson"
@@ -55,13 +57,16 @@ func (mongo *MongoDB) AppendResultToScanByID(id string, result scan.Result) erro
 	return collection.UpdateId(id, bson.M{"$push": bson.M{"result": result}})
 }
 
-// UpdateScanStatusByID updates the scan status on MongoDB service.
-func (mongo *MongoDB) UpdateScanStatusByID(id string, status scan.Status) error {
-
+// UpdateScanByID updates status and finishedAt scan fields on MongoDB service.
+func (mongo *MongoDB) UpdateScanByID(id string, status scan.Status, finishedAt *time.Time) error {
 	collection := mongo.getScanCollection()
 	defer collection.Database.Session.Close()
 
-	return collection.UpdateId(id, bson.M{"$set": bson.M{"status": status}})
+	data := bson.M{"status": status}
+	if finishedAt != nil {
+		data["finishedAt"] = *finishedAt
+	}
+	return collection.UpdateId(id, bson.M{"$set": data})
 }
 
 // GetScansByImage returns the list of scans that match a given image name.
