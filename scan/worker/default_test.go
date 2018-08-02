@@ -3,6 +3,7 @@ package worker
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tsuru/cst/db"
@@ -56,7 +57,7 @@ func TestScanTask_Run(t *testing.T) {
 		}
 
 		storage := &db.MockStorage{
-			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
+			MockUpdateScanByID: func(_ string, status scan.Status, _ *time.Time) error {
 				gotStatus = status
 
 				return nil
@@ -78,11 +79,11 @@ func TestScanTask_Run(t *testing.T) {
 		assert.True(t, wasSuccessful)
 	})
 
-	t.Run(`When storage returns any error on UpdateScanStatusByID method with scan.StatusRunning param, should abort execution and call the job.Error method`, func(t *testing.T) {
+	t.Run(`When storage returns any error on UpdateScanByID method with scan.StatusRunning param, should abort execution and call the job.Error method`, func(t *testing.T) {
 		gotJobError := false
 
 		storage := &db.MockStorage{
-			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
+			MockUpdateScanByID: func(_ string, status scan.Status, _ *time.Time) error {
 				if status == scan.StatusRunning {
 					return errors.New("just another error on storage")
 				}
@@ -115,11 +116,11 @@ func TestScanTask_Run(t *testing.T) {
 		assert.True(t, gotJobError)
 	})
 
-	t.Run(`When storage returns any error on UpdateScanStatusByID method with scan.StatusFinished param, should abort execution and call the job.Error method`, func(t *testing.T) {
+	t.Run(`When storage returns any error on UpdateScanByID method with scan.StatusFinished param, should abort execution and call the job.Error method`, func(t *testing.T) {
 		gotJobError := false
 
 		storage := &db.MockStorage{
-			MockUpdateScanStatusByID: func(id string, status scan.Status) error {
+			MockUpdateScanByID: func(_ string, status scan.Status, _ *time.Time) error {
 				if status == scan.StatusFinished {
 					return errors.New("just another error on storage")
 				}

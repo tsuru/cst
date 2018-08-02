@@ -1,6 +1,10 @@
 package db
 
-import "github.com/tsuru/cst/scan"
+import (
+	"time"
+
+	"github.com/tsuru/cst/scan"
+)
 
 // Storage represents a persistent data store.
 type Storage interface {
@@ -8,7 +12,7 @@ type Storage interface {
 	Close()
 	GetScansByImage(image string) ([]scan.Scan, error)
 	HasScheduledScanByImage(string) bool
-	UpdateScanStatusByID(string, scan.Status) error
+	UpdateScanByID(string, scan.Status, *time.Time) error
 	Ping() bool
 	Save(scan.Scan) error
 }

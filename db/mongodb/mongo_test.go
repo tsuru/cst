@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"testing"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/spf13/viper"
@@ -183,8 +184,7 @@ func TestMongoDB_AppendResultToScanByID(t *testing.T) {
 	})
 }
 
-func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
-
+func TestMongoDB_UpdateScanByID(t *testing.T) {
 	mongo := getMongoDBTestingInstance(t)
 
 	defer func() {
@@ -210,11 +210,39 @@ func TestMongoDB_UpdateScanStatusByID(t *testing.T) {
 
 		assert.Equal(t, scan.StatusScheduled, scanOnStorage.Status)
 
-		err := mongo.UpdateScanStatusByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.StatusRunning)
+		err := mongo.UpdateScanByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.StatusRunning, nil)
 
 		require.NoError(t, err)
 		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
 		assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
+	})
+
+	t.Run(`When updating scan to finished status with finishedAt time, should update scan status and finishedAt`, func(t *testing.T) {
+		scanColl := mongo.getScanCollection()
+
+		defer func() {
+			scanColl.DropCollection()
+			scanColl.Database.Session.Close()
+		}()
+
+		scanColl.Insert(scan.Scan{
+			ID:     "2b935a8f-4241-49f0-a1a2-e3c8ba347b95",
+			Status: scan.StatusScheduled,
+		})
+
+		var scanOnStorage scan.Scan
+
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+
+		assert.Equal(t, scan.StatusScheduled, scanOnStorage.Status)
+
+		now := time.Now()
+		err := mongo.UpdateScanByID("2b935a8f-4241-49f0-a1a2-e3c8ba347b95", scan.StatusRunning, &now)
+
+		require.NoError(t, err)
+		scanColl.FindId("2b935a8f-4241-49f0-a1a2-e3c8ba347b95").One(&scanOnStorage)
+		assert.Equal(t, scan.StatusRunning, scanOnStorage.Status)
+		assert.Equal(t, now.Unix(), scanOnStorage.FinishedAt.Unix())
 	})
 }
 
