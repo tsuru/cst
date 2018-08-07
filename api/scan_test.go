@@ -172,7 +172,7 @@ func TestCreateScan(t *testing.T) {
 
 func TestShowScans(t *testing.T) {
 
-	t.Run(`When there are no scans for a given image, should return 200 and an empty slice`, func(t *testing.T) {
+	t.Run(`When there are no scans for a given image, should return 204 and an empty body`, func(t *testing.T) {
 		storage := &db.MockStorage{
 			MockGetScansByImage: func(image string) ([]scan.Scan, error) {
 				return []scan.Scan{}, nil
@@ -196,9 +196,9 @@ func TestShowScans(t *testing.T) {
 
 		require.NoError(t, err)
 		e.HTTPErrorHandler(err, context)
-		assert.Equal(t, http.StatusOK, recorder.Code)
+		assert.Equal(t, http.StatusNoContent, recorder.Code)
 
-		assert.JSONEq(t, `[]`, recorder.Body.String())
+		assert.Equal(t, ``, recorder.Body.String())
 	})
 
 	t.Run(`When image param is bad URL encoded, should return 400 status code`, func(t *testing.T) {
