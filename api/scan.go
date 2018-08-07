@@ -42,6 +42,10 @@ func showScans(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	if len(scans) == 0 {
+		return ctx.NoContent(http.StatusNoContent)
+	}
+
 	return ctx.JSON(http.StatusOK, scans)
 }
 
