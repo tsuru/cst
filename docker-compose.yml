@@ -1,0 +1,85 @@
+---
+version: '2.3'
+
+services:
+  clair-database:
+    image: postgres:10-alpine
+    container_name: clair-database
+    environment:
+      POSTGRES_DB: clair
+      POSTGRES_USER: clair
+      POSTGRES_PASSWORD: clair
+    ports:
+    - 5432:5432
+    restart: unless-stopped
+    volumes:
+    - clair-database-data:/var/lib/postgresql/data:rw
+
+  clair:
+    image: quay.io/coreos/clair:v2.0.5
+    container_name: clair
+    command: ["-config", "/etc/clair/clair.cfg.yml"]
+    depends_on:
+    - clair-database
+    links:
+    - clair-database:database.clair.local
+    ports:
+    - 6060-6061:6060-6061
+    restart: unless-stopped
+    volumes:
+    - ./etc:/etc/clair:ro
+
+  cst-database:
+    image: mongo:4
+    container_name: cst-database
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${CST_DATABASE_USER?:"Please set the CST_DATABASE_USER (you can use .env file)"}
+      MONGO_INITDB_ROOT_PASSWORD: ${CST_DATABASE_PASSWORD?:"Please set the CST_DATABASE_PASSWORD (you can use .env file)"}
+    ports:
+    - 27017:27017
+    restart: unless-stopped
+    volumes:
+    - cst-database-data:/data/db
+
+  cst-server:
+    image: tsuru/cst
+    container_name: cst-server
+    command:
+    - server
+    - --database
+    - mongodb://${CST_DATABASE_USER}:${CST_DATABASE_PASSWORD}@database.cst.local:27017/cst?authSource=admin
+    - --cert-file
+    - /etc/ssl/cst/cert.pem
+    - --key-file
+    - /etc/ssl/cst/key.pem
+    depends_on:
+    - cst-database
+    links:
+    - cst-database:database.cst.local
+    user: root
+    ports:
+    - 8443:8443
+    restart: unless-stopped
+    volumes:
+    - ./.certs:/etc/ssl/cst:ro
+
+  cst-worker:
+    image: tsuru/cst
+    container_name: cst-worker
+    command:
+    - worker
+    - --database
+    - mongodb://${CST_DATABASE_USER}:${CST_DATABASE_PASSWORD}@database.cst.local:27017/cst?authSource=admin
+    - --clair-address
+    - http://clair.local:6060
+    depends_on:
+    - clair
+    - cst-database
+    links:
+    - clair:clair.local
+    - cst-database:database.cst.local
+    restart: unless-stopped
+
+volumes:
+  clair-database-data:
+  cst-database-data:
