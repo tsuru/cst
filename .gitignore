@@ -12,6 +12,9 @@
 *.out
 coverage.txt
 
+# Docker Compose env file
+.env
+
 # CST binary
 cst
 
