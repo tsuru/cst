@@ -67,10 +67,9 @@ paths:
         201:
           description: "Scan successfully scheduled"
         204:
-          description: "Scan ignored because already exist a scheduled scan"
+          description: "Scan ignored because a scheduled scan already exists"
         500:
-          description: "Problem to register the scan on database service."
-
+          description: "Failed to register the scan on database service"
 
   /v1/scan/{image}:
     get:
