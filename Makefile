@@ -5,6 +5,7 @@ GOBIN ?= $(GOPATH)/bin
 
 GODEP ?= $(GOBIN)/dep
 GOLINT ?= $(GOBIN)/golint
+MKCERT ?= $(GOBIN)/mkcert
 
 COVERAGE_FILE ?= coverage.out
 
@@ -32,6 +33,8 @@ get-dev-deps:
 	$(GO) get -u github.com/golang/dep/cmd/dep
 
 generate-self-signed-certificate:
+	$(MKCERT) -install
 	mkdir -p $(CST_CERTS_DIR)
-	$(GO) run $(GOROOT)/src/crypto/tls/generate_cert.go --host localhost --ecdsa-curve P256
-	mv cert.pem key.pem $(CST_CERTS_DIR)
+	$(MKCERT) cst.local localhost 127.0.0.1 ::1
+	mv cst.local+*-key.pem $(CST_CERTS_DIR)/key.pem
+	mv cst.local+*.pem $(CST_CERTS_DIR)/cert.pem
