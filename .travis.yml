@@ -16,8 +16,7 @@ jobs:
       script: make build
 
     - stage: test
-      script: make lint
-    - script: make test-with-coverage
+      script: make test
       env: 
       - STORAGE_URL=mongodb://127.0.0.1:27017/
 

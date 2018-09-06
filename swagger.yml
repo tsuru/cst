@@ -1,0 +1,140 @@
+swagger: "2.0"
+
+schemes:
+- "https"
+- "http"
+
+info:
+  title: "CST - Web API"
+  version: "1.0.0"
+  description: "This document outlines the CST's web API specification."
+
+  contact:
+    name: "Tsuru"
+    email: "tsuru@corp.globo.com"
+
+tags:
+- name: "scan"
+- name: "system"
+
+paths:
+  /health:
+    get:
+      summary: "Check the application status"
+      description: "Checks whether the current instance is able to receive new requests. The liveness algorithm is based on connection status between the current web instance and database/queue services."
+
+      tags:
+      - "system"
+
+      produces:
+      - "text/plain"
+      responses:
+        200:
+          description: "Indicates the current web instance alive and ready to receive requests."
+          schema:
+            type: "string"
+            example: "WORKING"
+        500:
+          description: "Indicates the current web instance is not ready to receive new requests."
+          schema:
+            type: "string"
+            example: "DOWN"
+
+  /v1/scan:
+    post:
+      summary: "Schedule a new scan for a container image"
+
+      tags:
+      - "scan"
+
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            image:
+              type: "string"
+              example: "tsuru/cst:latest"
+
+      responses:
+        201:
+          description: "Scan successfully scheduled"
+        204:
+          description: "Scan ignored because already exist a scheduled scan"
+        500:
+          description: "Problem to register the scan on database service."
+
+
+  /v1/scan/{image}:
+    get:
+      summary: "List all scans (if any) of a container image."
+      tags:
+      - "scan"
+
+      parameters:
+      - in: "path"
+        name: "image"
+        type: "string"
+        required: true
+        description: "An URL encoded container image name (e.g. **tsuru%2Fcst%3Alatest**)"
+
+      responses:
+        200:
+          description: "Successful to get some scans"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Scan"
+        204:
+          description: "There are no scans for that image"
+        400:
+          description: "Could not read/extract container image param"
+        500:
+          description: "Problem to get scans from database service."
+
+definitions:
+  Scan:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      status:
+        $ref: "#/definitions/Status"
+      image:
+        type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      finishedAt:
+        type: "string"
+        format: "date-time"
+      result:
+        $ref: "#/definitions/Result"
+
+  Status:
+    type: "string"
+    enum:
+    - "aborted"
+    - "finished"
+    - "running"
+    - "scheduled"
+
+  Result:
+    type: "object"
+    properties:
+      scanner:
+        type: "string"
+        example: "clair"
+      vulnerabilities:
+        type: "object"
+        example: []
+      error:
+        type: "string"
