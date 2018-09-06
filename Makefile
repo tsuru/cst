@@ -5,6 +5,7 @@ GOBIN ?= $(GOPATH)/bin
 
 GODEP ?= $(GOBIN)/dep
 GOLINT ?= $(GOBIN)/golint
+GOSEC ?= $(GOBIN)/gosec
 SWAGGER ?= $(GOBIN)/swagger
 
 COVERAGE_FILE ?= coverage.out
@@ -14,15 +15,19 @@ CST_CERTS_DIR ?= .certs
 
 .PHONY: build get-dev-deps lint test test-with-coverage
 		generate-self-signed-certificate
+		security-check
 		validate-swagger-spec
 
 build:
 	$(GO) build -o "$(CSTBIN)"
 
-test: lint test-with-coverage validate-swagger-spec
+test: lint security-check test-with-coverage validate-swagger-spec
 
 lint:
 	$(GOLINT) $(shell $(GO) list ./...)
+
+security-check:
+	$(GOSEC) -severity medium ./...
 
 test-with-coverage:
 	$(GO) test -v -cover -coverprofile=$(COVERAGE_FILE) ./...
@@ -33,8 +38,9 @@ validate-swagger-spec:
 	$(SWAGGER) validate swagger.yml
 
 get-dev-deps:
-	$(GO) get -u golang.org/x/lint/golint
 	$(GO) get -u github.com/golang/dep/cmd/dep
+	$(GO) get -u golang.org/x/lint/golint
+	$(GO) get -u github.com/securego/gosec/cmd/gosec
 	$(GO) get -u github.com/go-swagger/go-swagger/cmd/swagger
 
 generate-self-signed-certificate:
