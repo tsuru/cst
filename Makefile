@@ -34,6 +34,7 @@ test-with-coverage:
 	$(GO) test -v -cover -coverprofile=$(COVERAGE_FILE) ./...
 	grep -v "mock.go" $(COVERAGE_FILE) > coverage.txt
 	$(GO) tool cover -func=coverage.txt
+	rm $(COVERAGE_FILE)
 
 validate-swagger-spec:
 	$(SWAGGER) validate swagger.yml
