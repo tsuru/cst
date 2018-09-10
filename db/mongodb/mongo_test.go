@@ -1,21 +1,15 @@
 package mongodb
 
 import (
+	"os"
 	"testing"
 	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tsuru/cst/scan"
 )
-
-func init() {
-	if viper.IsSet("STORAGE_URL") {
-		viper.AutomaticEnv()
-	}
-}
 
 func TestMongoDB_Save(t *testing.T) {
 
@@ -315,11 +309,13 @@ func TestMongoDB_Ping(t *testing.T) {
 
 func getMongoDBTestingInstance(t *testing.T) *MongoDB {
 
-	if !viper.IsSet("STORAGE_URL") {
+	storageURL := os.Getenv("STORAGE_URL")
+
+	if storageURL == "" {
 		t.Skip("mongodb connection url are not assigned, skipping integration tests")
 	}
 
-	mongo, err := NewMongoDB(viper.GetString("STORAGE_URL"))
+	mongo, err := NewMongoDB(storageURL)
 
 	require.NoError(t, err, "could not connect with mongodb service")
 
